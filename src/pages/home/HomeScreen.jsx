@@ -2,18 +2,26 @@ import { Link } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import { Info, Play } from "lucide-react";
 import useGetTrendingContent from "../../hooks/useGetTrendingContent";
-import { ORIGINAL_IMG_BASE_URL } from "../../utils/constants";
+import {
+  MOVIE_CATEGORIES,
+  ORIGINAL_IMG_BASE_URL,
+  TV_CATEGORIES,
+} from "../../utils/constants";
+import { useContentStore } from "../../store/content";
+import MovieSlider from "../../components/MovieSlider";
+import { useState } from "react";
 
 const HomeScreen = () => {
   const { trendingContent } = useGetTrendingContent();
-  console.log("trendingContent", trendingContent);
+  const { contentType } = useContentStore();
+  const { imgLoading, setImageLoading } = useState(true);
 
   //  add a loading spinner
   if (!trendingContent)
     return (
       <div className="h-screen text-white relative">
         <Navbar />
-        <div className="absolute top-0 left-0 w-full bg-black/70 flex items-center justify-center -z-10 shimmer"></div>
+        <div className="absolute top-0 left-0 w-full bg-black/70 flex items-center justify-center -z-10 shimmer" />
       </div>
     );
 
@@ -22,10 +30,15 @@ const HomeScreen = () => {
       <div className="relative h-screen text-white">
         <Navbar />
 
+        {imgLoading && (
+          <div className="absolute top-0 left-0 w-full bg-black/70 flex items-center justify-center -z-10 shimmer" />
+        )}
+
         <img
           src={ORIGINAL_IMG_BASE_URL + trendingContent?.backdrop_path}
           alt="Hero img"
           className="absolute top-0 left-0 w-full h-full object-cover -z-50"
+          onLoad={() => setImageLoading(false)}
         />
         <div
           className="absolute top-0 left-0 w-full h-full bg-black/50 -z-50"
@@ -67,6 +80,16 @@ const HomeScreen = () => {
             </Link>
           </div>
         </div>
+      </div>
+
+      <div className="flex flex-col gap-10 bg-black py-10">
+        {contentType === "movie"
+          ? MOVIE_CATEGORIES.map((category) => (
+              <MovieSlider key={category} category={category} />
+            ))
+          : TV_CATEGORIES.map((category) => (
+              <MovieSlider key={category} category={category} />
+            ))}
       </div>
     </>
   );
